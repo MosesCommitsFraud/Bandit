@@ -31,9 +31,13 @@ public class MainViewModel : INotifyPropertyChanged
     private bool _autoAddToSoundboard = true;
     public bool AutoAddToSoundboard { get => _autoAddToSoundboard; set { _autoAddToSoundboard = value; OnPropertyChanged(); } }
 
+    private bool _extractAudioFromVideos = false;
+    public bool ExtractAudioFromVideos { get => _extractAudioFromVideos; set { _extractAudioFromVideos = value; OnPropertyChanged(); } }
+
     public ICommand DownloadCommand { get; }
     public ICommand AddSoundCommand { get; }
     public ICommand SaveLayoutCommand { get; }
+    public ICommand OpenFolderCommand { get; }
 
     public MainViewModel(IDownloadService downloader, AudioService audio, HotkeyService hotkeys, SettingsService settings)
     {
@@ -50,7 +54,19 @@ public class MainViewModel : INotifyPropertyChanged
             Directory.CreateDirectory(outDir);
 
             var kind = SelectedKind.Equals("Video", StringComparison.OrdinalIgnoreCase) ? DownloadKind.Video : DownloadKind.Audio;
-            Append($"Downloading {kind}: {Url}");
+            
+            // If extracting audio from videos, force audio download
+            if (ExtractAudioFromVideos && kind == DownloadKind.Video)
+            {
+                kind = DownloadKind.Audio;
+                Append($"Downloading and extracting audio: {Url}");
+            }
+            else
+            {
+                Append($"Downloading {kind}: {Url}");
+            }
+            
+            Append($"📁 Saving to: {outDir}");
 
             var progress = new Progress<string>(Append);
             var res = await _downloader.DownloadAsync(new DownloadRequest(Url, outDir, kind), progress);
@@ -95,6 +111,14 @@ public class MainViewModel : INotifyPropertyChanged
         {
             _settings.Save(Sounds);
             Append("Layout saved.");
+        });
+
+        OpenFolderCommand = new RelayCommand(() =>
+        {
+            var outDir = _settings.DefaultDownloadDirectory;
+            Directory.CreateDirectory(outDir);
+            System.Diagnostics.Process.Start("explorer.exe", outDir);
+            Append($"📁 Opened: {outDir}");
         });
 
         // Load saved

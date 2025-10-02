@@ -12,17 +12,24 @@
     <!-- Downloader -->
     <StackPanel>
       <StackPanel Orientation="Horizontal">
-        <TextBox Width="520" Text="{Binding Url, UpdateSourceTrigger=PropertyChanged}" 
+        <TextBox Width="460" Text="{Binding Url, UpdateSourceTrigger=PropertyChanged}" 
                  ToolTip="Enter YouTube URL"/>
-        <ComboBox Width="140" Margin="8,0,0,0" SelectedItem="{Binding SelectedKind}">
+        <ComboBox Width="100" Margin="8,0,0,0" SelectedItem="{Binding SelectedKind}">
           <ComboBoxItem Content="Audio"/>
           <ComboBoxItem Content="Video"/>
         </ComboBox>
-        <Button Content="Download" Command="{Binding DownloadCommand}" Width="120" Margin="8,0,0,0"/>
+        <Button Content="Download" Command="{Binding DownloadCommand}" Width="100" Margin="8,0,0,0"/>
+        <Button Content="📁 Open Folder" Command="{Binding OpenFolderCommand}" Width="120" Margin="8,0,0,0" 
+                ToolTip="Open downloads folder"/>
       </StackPanel>
-      <CheckBox Content="Auto-add audio to soundboard" 
-                IsChecked="{Binding AutoAddToSoundboard}" 
-                Margin="0,6,0,0"/>
+      <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+        <CheckBox Content="Auto-add audio to soundboard" 
+                  IsChecked="{Binding AutoAddToSoundboard}"/>
+        <CheckBox Content="Extract audio from videos" 
+                  IsChecked="{Binding ExtractAudioFromVideos}" 
+                  Margin="16,0,0,0"
+                  ToolTip="Convert videos to MP3 using ffmpeg (allows adding to soundboard)"/>
+      </StackPanel>
     </StackPanel>
 
     <!-- Logs -->
