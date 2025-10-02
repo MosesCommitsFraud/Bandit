@@ -1,4 +1,5 @@
 using System;
+using System.Windows;
 using System.Windows.Input;
 using GnR.App.Models;
 using GnR.App.Services;
@@ -26,9 +27,21 @@ public class SoundItemViewModel
         _hotkeys = hotkeys;
         _remove = remove;
 
-        PlayCommand = new RelayCommand(() => _audio.Play(Model.Path));
+        PlayCommand = new RelayCommand(() => TryPlay());
         BindCommand = new RelayCommand(BindHotkey);
         RemoveCommand = new RelayCommand(() => _remove(this));
+    }
+
+    private void TryPlay()
+    {
+        try
+        {
+            _audio.Play(Model.Path);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(ex.Message, "Playback Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
     }
 
     private void BindHotkey()
@@ -40,6 +53,19 @@ public class SoundItemViewModel
             _hotkeys.Unbind(Model.Hotkey!);
 
         Model.Hotkey = input.Trim();
-        _hotkeys.Bind(Model.Hotkey!, () => _audio.Play(Model.Path));
+        _hotkeys.Bind(Model.Hotkey!, () => TryPlayWithHotkey());
+    }
+
+    private void TryPlayWithHotkey()
+    {
+        try
+        {
+            _audio.Play(Model.Path);
+        }
+        catch
+        {
+            // Silently fail for hotkey playback to avoid interrupting user
+            // The file might have been moved or deleted
+        }
     }
 }

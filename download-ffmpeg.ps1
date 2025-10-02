@@ -3,7 +3,7 @@
 $ffmpegUrl = "https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-gpl.zip"
 $tempZip = Join-Path $env:TEMP "ffmpeg.zip"
 $tempExtract = Join-Path $env:TEMP "ffmpeg-extract"
-$outputDir = Join-Path $PSScriptRoot "Rhombus.App\bin\Debug\net9.0-windows"
+$outputDir = Join-Path $PSScriptRoot "GnR.App\bin\Debug\net9.0-windows"
 
 Write-Host "Downloading ffmpeg..." -ForegroundColor Cyan
 

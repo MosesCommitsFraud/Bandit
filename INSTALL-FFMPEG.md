@@ -1,4 +1,4 @@
-# Installing ffmpeg for Rhombus
+# Installing ffmpeg for GnR
 
 yt-dlp requires **ffmpeg** to convert YouTube videos to MP3 audio files. Here are the easiest ways to install it:
 
@@ -43,12 +43,12 @@ This places ffmpeg in the application directory.
    - `ffmpeg.exe`
    - `ffprobe.exe`
    - `ffplay.exe`
-5. Paste them in: `Rhombus.App\bin\Debug\net9.0-windows\`
+5. Paste them in: `GnR.App\bin\Debug\net9.0-windows\`
 
 ## Option 6: Portable Installation (Recommended for Distribution)
 
 1. Download: https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip
-2. Extract and copy `ffmpeg.exe` and `ffprobe.exe` to the Rhombus app directory
+2. Extract and copy `ffmpeg.exe` and `ffprobe.exe` to the GnR app directory
 3. These files will be next to `yt-dlp.exe`
 
 ## Verify Installation
@@ -63,5 +63,5 @@ If you installed to the app directory instead of PATH, the app will automaticall
 
 ## Quick Test
 
-Once installed, try downloading a YouTube video again in Rhombus!
+Once installed, try downloading a YouTube video again in GnR!
 

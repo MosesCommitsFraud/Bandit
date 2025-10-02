@@ -100,15 +100,47 @@ public class MainViewModel : INotifyPropertyChanged
         // Load saved
         foreach (var s in _settings.Load())
         {
+            // Validate the file still exists and is an audio file
+            if (!File.Exists(s.Path))
+            {
+                Append($"⚠️ Skipping {s.DisplayName} - file not found");
+                continue;
+            }
+
+            if (!_audio.IsAudioFile(s.Path))
+            {
+                Append($"⚠️ Skipping {s.DisplayName} - not an audio file");
+                continue;
+            }
+
             var vm = new SoundItemViewModel(s, _audio, _hotkeys, RemoveSound);
             Sounds.Add(vm);
             if (!string.IsNullOrWhiteSpace(s.Hotkey))
-                _hotkeys.Bind(s.Hotkey!, () => _audio.Play(s.Path));
+            {
+                try
+                {
+                    _hotkeys.Bind(s.Hotkey!, () =>
+                    {
+                        try { _audio.Play(s.Path); } catch { /* Silent fail for hotkey */ }
+                    });
+                }
+                catch
+                {
+                    Append($"⚠️ Failed to bind hotkey {s.Hotkey} for {s.DisplayName}");
+                }
+            }
         }
     }
 
     private void AddSoundToBoard(string filePath)
     {
+        // Validate that it's an audio file
+        if (!_audio.IsAudioFile(filePath))
+        {
+            Append($"⚠️ Cannot add {Path.GetFileName(filePath)} - only audio files can be added to soundboard");
+            return;
+        }
+
         var model = new SoundItem
         {
             Path = filePath,
