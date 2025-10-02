@@ -9,7 +9,6 @@
     <Grid.RowDefinitions>
       <RowDefinition Height="Auto"/>
       <RowDefinition Height="*"/>
-      <RowDefinition Height="Auto"/>
     </Grid.RowDefinitions>
 
     <!-- Downloader -->
@@ -25,7 +24,7 @@
         <Button Content="📁 Open Folder" Command="{Binding OpenFolderCommand}" Width="120" Margin="8,0,0,0" 
                 ToolTip="Open downloads folder"/>
       </StackPanel>
-      <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+      <StackPanel Orientation="Horizontal" Margin="0,6,0,12">
         <CheckBox Content="Auto-add audio to soundboard" 
                   IsChecked="{Binding AutoAddToSoundboard}"/>
         <CheckBox Content="Extract audio from videos" 
@@ -35,12 +34,8 @@
       </StackPanel>
     </StackPanel>
 
-    <!-- Logs -->
-    <TextBox Grid.Row="1" Text="{Binding LogText}" IsReadOnly="True"
-             VerticalScrollBarVisibility="Auto" TextWrapping="Wrap" />
-
     <!-- Soundboard controls -->
-    <DockPanel Grid.Row="2">
+    <DockPanel Grid.Row="1">
       <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,8">
         <Button Content="Add Sound…" Command="{Binding AddSoundCommand}" Padding="12,4"/>
         <Button Content="Save Layout" Command="{Binding SaveLayoutCommand}" Margin="8,0,0,0" Padding="12,4"/>

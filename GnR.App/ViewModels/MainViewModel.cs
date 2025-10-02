@@ -2,6 +2,7 @@ using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows.Forms;
 using System.Windows.Input;
@@ -121,36 +122,56 @@ public class MainViewModel : INotifyPropertyChanged
             Append($"📁 Opened: {outDir}");
         });
 
-        // Load saved
-        foreach (var s in _settings.Load())
+        // Load all audio files from the downloads folder
+        LoadSoundsFromFolder();
+    }
+
+    private void LoadSoundsFromFolder()
+    {
+        var outDir = _settings.DefaultDownloadDirectory;
+        if (!Directory.Exists(outDir))
         {
-            // Validate the file still exists and is an audio file
-            if (!File.Exists(s.Path))
-            {
-                Append($"⚠️ Skipping {s.DisplayName} - file not found");
-                continue;
-            }
+            Directory.CreateDirectory(outDir);
+            return;
+        }
 
-            if (!_audio.IsAudioFile(s.Path))
-            {
-                Append($"⚠️ Skipping {s.DisplayName} - not an audio file");
-                continue;
-            }
+        // Load saved settings to restore hotkeys
+        var savedSounds = _settings.Load().ToDictionary(s => s.Path, StringComparer.OrdinalIgnoreCase);
 
-            var vm = new SoundItemViewModel(s, _audio, _hotkeys, RemoveSound);
+        // Get all audio files from the folder
+        var audioFiles = Directory.GetFiles(outDir)
+            .Where(f => _audio.IsAudioFile(f))
+            .OrderBy(f => Path.GetFileName(f));
+
+        foreach (var filePath in audioFiles)
+        {
+            // Check if we have saved settings for this file
+            SoundItem? savedSound = null;
+            savedSounds.TryGetValue(filePath, out savedSound);
+
+            var model = new SoundItem
+            {
+                Path = filePath,
+                DisplayName = savedSound?.DisplayName ?? Path.GetFileNameWithoutExtension(filePath),
+                Hotkey = savedSound?.Hotkey
+            };
+
+            var vm = new SoundItemViewModel(model, _audio, _hotkeys, RemoveSound);
             Sounds.Add(vm);
-            if (!string.IsNullOrWhiteSpace(s.Hotkey))
+
+            // Restore hotkey binding if it exists
+            if (!string.IsNullOrWhiteSpace(model.Hotkey))
             {
                 try
                 {
-                    _hotkeys.Bind(s.Hotkey!, () =>
+                    _hotkeys.Bind(model.Hotkey!, () =>
                     {
-                        try { _audio.Play(s.Path); } catch { /* Silent fail for hotkey */ }
+                        try { _audio.Play(model.Path); } catch { /* Silent fail for hotkey */ }
                     });
                 }
                 catch
                 {
-                    Append($"⚠️ Failed to bind hotkey {s.Hotkey} for {s.DisplayName}");
+                    // Hotkey binding failed, silently ignore
                 }
             }
         }
@@ -163,6 +184,12 @@ public class MainViewModel : INotifyPropertyChanged
         {
             Append($"⚠️ Cannot add {Path.GetFileName(filePath)} - only audio files can be added to soundboard");
             return;
+        }
+
+        // Check if already in soundboard
+        if (Sounds.Any(s => s.Model.Path.Equals(filePath, StringComparison.OrdinalIgnoreCase)))
+        {
+            return; // Already exists, don't add duplicate
         }
 
         var model = new SoundItem
