@@ -296,5 +296,8 @@ public class RelayCommand : ICommand
         if (_async != null) await _async();
         else _sync?.Invoke();
     }
+    
+#pragma warning disable 67 // Event is never used - required by ICommand interface
     public event EventHandler? CanExecuteChanged;
+#pragma warning restore 67
 }
