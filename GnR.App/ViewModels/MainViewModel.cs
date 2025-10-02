@@ -181,6 +181,78 @@ public class MainViewModel : INotifyPropertyChanged
         Sounds.Remove(vm);
     }
 
+    public void HandleDroppedFiles(string[] files)
+    {
+        if (files == null || files.Length == 0) return;
+
+        Append($"📥 Dropped {files.Length} file(s)");
+        var outDir = _settings.DefaultDownloadDirectory;
+        Directory.CreateDirectory(outDir);
+
+        foreach (var file in files)
+        {
+            try
+            {
+                if (!File.Exists(file))
+                {
+                    Append($"❌ File not found: {Path.GetFileName(file)}");
+                    continue;
+                }
+
+                var fileName = Path.GetFileName(file);
+                var ext = Path.GetExtension(file).ToLowerInvariant();
+
+                // Check if it's an audio file
+                if (_audio.IsAudioFile(file))
+                {
+                    // Copy to downloads folder
+                    var destPath = Path.Combine(outDir, fileName);
+                    
+                    // Handle duplicate names
+                    if (File.Exists(destPath) && !file.Equals(destPath, StringComparison.OrdinalIgnoreCase))
+                    {
+                        var nameWithoutExt = Path.GetFileNameWithoutExtension(fileName);
+                        var counter = 1;
+                        do
+                        {
+                            fileName = $"{nameWithoutExt} ({counter}){ext}";
+                            destPath = Path.Combine(outDir, fileName);
+                            counter++;
+                        } while (File.Exists(destPath));
+                    }
+
+                    // Copy file if not already in the target folder
+                    if (!file.Equals(destPath, StringComparison.OrdinalIgnoreCase))
+                    {
+                        File.Copy(file, destPath, overwrite: false);
+                        Append($"📋 Copied: {fileName}");
+                    }
+                    else
+                    {
+                        Append($"📋 Using: {fileName}");
+                    }
+
+                    // Add to soundboard
+                    AddSoundToBoard(destPath);
+                    Append($"🎵 Added to soundboard: {Path.GetFileNameWithoutExtension(fileName)}");
+                }
+                else if (ext == ".mp4" || ext == ".webm" || ext == ".mkv" || ext == ".avi" || ext == ".mov")
+                {
+                    Append($"⚠️ {fileName} is a video file - only audio files can be added to soundboard");
+                    Append($"💡 Tip: Use the downloader with 'Extract audio from videos' option for videos");
+                }
+                else
+                {
+                    Append($"⚠️ {fileName} - unsupported format");
+                }
+            }
+            catch (Exception ex)
+            {
+                Append($"❌ Error processing {Path.GetFileName(file)}: {ex.Message}");
+            }
+        }
+    }
+
     private void Append(string s) => LogText += (LogText.Length > 0 ? Environment.NewLine : "") + s;
 
     public event PropertyChangedEventHandler? PropertyChanged;
