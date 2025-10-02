@@ -29,16 +29,12 @@ public class MainViewModel : INotifyPropertyChanged
     private string _logText = "";
     public string LogText { get => _logText; set { _logText = value; OnPropertyChanged(); } }
 
-    private bool _autoAddToSoundboard = true;
-    public bool AutoAddToSoundboard { get => _autoAddToSoundboard; set { _autoAddToSoundboard = value; OnPropertyChanged(); } }
-
-    private bool _extractAudioFromVideos = false;
-    public bool ExtractAudioFromVideos { get => _extractAudioFromVideos; set { _extractAudioFromVideos = value; OnPropertyChanged(); } }
-
     public ICommand DownloadCommand { get; }
     public ICommand AddSoundCommand { get; }
     public ICommand SaveLayoutCommand { get; }
     public ICommand OpenFolderCommand { get; }
+    public ICommand ClearAllCommand { get; }
+    public ICommand RefreshCommand { get; }
 
     public MainViewModel(IDownloadService downloader, AudioService audio, HotkeyService hotkeys, SettingsService settings)
     {
@@ -49,43 +45,21 @@ public class MainViewModel : INotifyPropertyChanged
 
         DownloadCommand = new RelayCommand(async () =>
         {
-            if (string.IsNullOrWhiteSpace(Url)) { Append("Enter a URL."); return; }
+            if (string.IsNullOrWhiteSpace(Url)) { return; }
 
             var outDir = _settings.DefaultDownloadDirectory;
             Directory.CreateDirectory(outDir);
 
-            var kind = SelectedKind.Equals("Video", StringComparison.OrdinalIgnoreCase) ? DownloadKind.Video : DownloadKind.Audio;
+            // Always extract audio from videos
+            var kind = DownloadKind.Audio;
             
-            // If extracting audio from videos, force audio download
-            if (ExtractAudioFromVideos && kind == DownloadKind.Video)
-            {
-                kind = DownloadKind.Audio;
-                Append($"Downloading and extracting audio: {Url}");
-            }
-            else
-            {
-                Append($"Downloading {kind}: {Url}");
-            }
-            
-            Append($"📁 Saving to: {outDir}");
-
             var progress = new Progress<string>(Append);
             var res = await _downloader.DownloadAsync(new DownloadRequest(Url, outDir, kind), progress);
 
-            if (res.Success)
+            if (res.Success && !string.IsNullOrEmpty(res.OutputPath))
             {
-                Append($"✅ Done: {res.OutputPath}");
-                
-                // Auto-add audio files to soundboard
-                if (AutoAddToSoundboard && kind == DownloadKind.Audio && !string.IsNullOrEmpty(res.OutputPath))
-                {
-                    AddSoundToBoard(res.OutputPath);
-                    Append($"🎵 Added to soundboard");
-                }
-            }
-            else
-            {
-                Append($"❌ Error: {res.Error}");
+                // Always auto-add audio files to soundboard
+                AddSoundToBoard(res.OutputPath);
             }
         });
 
@@ -111,7 +85,6 @@ public class MainViewModel : INotifyPropertyChanged
         SaveLayoutCommand = new RelayCommand(() =>
         {
             _settings.Save(Sounds);
-            Append("Layout saved.");
         });
 
         OpenFolderCommand = new RelayCommand(() =>
@@ -119,7 +92,42 @@ public class MainViewModel : INotifyPropertyChanged
             var outDir = _settings.DefaultDownloadDirectory;
             Directory.CreateDirectory(outDir);
             System.Diagnostics.Process.Start("explorer.exe", outDir);
-            Append($"📁 Opened: {outDir}");
+        });
+
+        ClearAllCommand = new RelayCommand(() =>
+        {
+            if (Sounds.Count == 0) return;
+
+            var result = System.Windows.MessageBox.Show(
+                "Are you sure you want to remove all sounds from the soundboard?\n\nNote: Files will remain in the downloads folder.",
+                "Clear All Sounds",
+                System.Windows.MessageBoxButton.YesNo,
+                System.Windows.MessageBoxImage.Question);
+
+            if (result == System.Windows.MessageBoxResult.Yes)
+            {
+                // Unbind all hotkeys
+                foreach (var sound in Sounds)
+                {
+                    if (!string.IsNullOrWhiteSpace(sound.Model.Hotkey))
+                        _hotkeys.Unbind(sound.Model.Hotkey!);
+                }
+                Sounds.Clear();
+            }
+        });
+
+        RefreshCommand = new RelayCommand(() =>
+        {
+            // Clear current sounds
+            foreach (var sound in Sounds)
+            {
+                if (!string.IsNullOrWhiteSpace(sound.Model.Hotkey))
+                    _hotkeys.Unbind(sound.Model.Hotkey!);
+            }
+            Sounds.Clear();
+
+            // Reload from folder
+            LoadSoundsFromFolder();
         });
 
         // Load all audio files from the downloads folder
@@ -180,11 +188,7 @@ public class MainViewModel : INotifyPropertyChanged
     private void AddSoundToBoard(string filePath)
     {
         // Validate that it's an audio file
-        if (!_audio.IsAudioFile(filePath))
-        {
-            Append($"⚠️ Cannot add {Path.GetFileName(filePath)} - only audio files can be added to soundboard");
-            return;
-        }
+        if (!_audio.IsAudioFile(filePath)) return;
 
         // Check if already in soundboard
         if (Sounds.Any(s => s.Model.Path.Equals(filePath, StringComparison.OrdinalIgnoreCase)))
@@ -212,7 +216,6 @@ public class MainViewModel : INotifyPropertyChanged
     {
         if (files == null || files.Length == 0) return;
 
-        Append($"📥 Dropped {files.Length} file(s)");
         var outDir = _settings.DefaultDownloadDirectory;
         Directory.CreateDirectory(outDir);
 
@@ -220,11 +223,7 @@ public class MainViewModel : INotifyPropertyChanged
         {
             try
             {
-                if (!File.Exists(file))
-                {
-                    Append($"❌ File not found: {Path.GetFileName(file)}");
-                    continue;
-                }
+                if (!File.Exists(file)) continue;
 
                 var fileName = Path.GetFileName(file);
                 var ext = Path.GetExtension(file).ToLowerInvariant();
@@ -252,30 +251,27 @@ public class MainViewModel : INotifyPropertyChanged
                     if (!file.Equals(destPath, StringComparison.OrdinalIgnoreCase))
                     {
                         File.Copy(file, destPath, overwrite: false);
-                        Append($"📋 Copied: {fileName}");
-                    }
-                    else
-                    {
-                        Append($"📋 Using: {fileName}");
                     }
 
                     // Add to soundboard
                     AddSoundToBoard(destPath);
-                    Append($"🎵 Added to soundboard: {Path.GetFileNameWithoutExtension(fileName)}");
                 }
                 else if (ext == ".mp4" || ext == ".webm" || ext == ".mkv" || ext == ".avi" || ext == ".mov")
                 {
-                    Append($"⚠️ {fileName} is a video file - only audio files can be added to soundboard");
-                    Append($"💡 Tip: Use the downloader with 'Extract audio from videos' option for videos");
-                }
-                else
-                {
-                    Append($"⚠️ {fileName} - unsupported format");
+                    System.Windows.MessageBox.Show(
+                        $"{fileName} is a video file.\n\nPlease use the YouTube downloader to extract audio from videos.",
+                        "Video File",
+                        System.Windows.MessageBoxButton.OK,
+                        System.Windows.MessageBoxImage.Information);
                 }
             }
             catch (Exception ex)
             {
-                Append($"❌ Error processing {Path.GetFileName(file)}: {ex.Message}");
+                System.Windows.MessageBox.Show(
+                    $"Error processing {Path.GetFileName(file)}:\n{ex.Message}",
+                    "Error",
+                    System.Windows.MessageBoxButton.OK,
+                    System.Windows.MessageBoxImage.Error);
             }
         }
     }

@@ -35,4 +35,25 @@ public partial class MainWindow : Window
             _viewModel.HandleDroppedFiles(files);
         }
     }
+
+    private void Exit_Click(object sender, RoutedEventArgs e)
+    {
+        Application.Current.Shutdown();
+    }
+
+    private void About_Click(object sender, RoutedEventArgs e)
+    {
+        MessageBox.Show(
+            "GnR - Grab and Run Soundboard\n\n" +
+            "A YouTube downloader with hotkey-enabled soundboard.\n\n" +
+            "Features:\n" +
+            "• Download audio from YouTube\n" +
+            "• Drag & drop audio files\n" +
+            "• Global hotkey support\n" +
+            "• Auto-loads sounds from Music\\GnR folder\n\n" +
+            "Version 1.0",
+            "About GnR",
+            MessageBoxButton.OK,
+            MessageBoxImage.Information);
+    }
 }

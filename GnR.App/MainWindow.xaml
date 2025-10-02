@@ -5,37 +5,43 @@
         AllowDrop="True"
         Drop="Window_Drop"
         DragOver="Window_DragOver">
-  <Grid Margin="12">
-    <Grid.RowDefinitions>
-      <RowDefinition Height="Auto"/>
-      <RowDefinition Height="*"/>
-    </Grid.RowDefinitions>
+  <DockPanel>
+    <!-- Menu Bar -->
+    <Menu DockPanel.Dock="Top">
+      <MenuItem Header="_File">
+        <MenuItem Header="_Open Downloads Folder" Command="{Binding OpenFolderCommand}"/>
+        <Separator/>
+        <MenuItem Header="_Exit" Click="Exit_Click"/>
+      </MenuItem>
+      <MenuItem Header="_Edit">
+        <MenuItem Header="_Add Sound..." Command="{Binding AddSoundCommand}"/>
+        <MenuItem Header="_Clear All Sounds" Command="{Binding ClearAllCommand}"/>
+      </MenuItem>
+      <MenuItem Header="_View">
+        <MenuItem Header="_Refresh Sounds" Command="{Binding RefreshCommand}" ToolTip="Reload all sounds from folder"/>
+      </MenuItem>
+      <MenuItem Header="_Help">
+        <MenuItem Header="_About" Click="About_Click"/>
+      </MenuItem>
+    </Menu>
 
-    <!-- Downloader -->
-    <StackPanel>
-      <StackPanel Orientation="Horizontal">
-        <TextBox Width="460" Text="{Binding Url, UpdateSourceTrigger=PropertyChanged}" 
-                 ToolTip="Enter YouTube URL"/>
-        <ComboBox Width="100" Margin="8,0,0,0" SelectedItem="{Binding SelectedKind}">
-          <ComboBoxItem Content="Audio"/>
-          <ComboBoxItem Content="Video"/>
-        </ComboBox>
-        <Button Content="Download" Command="{Binding DownloadCommand}" Width="100" Margin="8,0,0,0"/>
-        <Button Content="📁 Open Folder" Command="{Binding OpenFolderCommand}" Width="120" Margin="8,0,0,0" 
-                ToolTip="Open downloads folder"/>
-      </StackPanel>
-      <StackPanel Orientation="Horizontal" Margin="0,6,0,12">
-        <CheckBox Content="Auto-add audio to soundboard" 
-                  IsChecked="{Binding AutoAddToSoundboard}"/>
-        <CheckBox Content="Extract audio from videos" 
-                  IsChecked="{Binding ExtractAudioFromVideos}" 
-                  Margin="16,0,0,0"
-                  ToolTip="Convert videos to MP3 using ffmpeg (allows adding to soundboard)"/>
-      </StackPanel>
-    </StackPanel>
+    <Grid Margin="12">
+      <Grid.RowDefinitions>
+        <RowDefinition Height="Auto"/>
+        <RowDefinition Height="*"/>
+      </Grid.RowDefinitions>
 
-    <!-- Soundboard controls -->
-    <DockPanel Grid.Row="1">
+      <!-- Downloader -->
+      <StackPanel Margin="0,0,0,12">
+        <StackPanel Orientation="Horizontal">
+          <TextBox Width="650" Text="{Binding Url, UpdateSourceTrigger=PropertyChanged}" 
+                   ToolTip="Enter YouTube URL (audio will be extracted automatically) or drag audio files into the window"/>
+          <Button Content="Download Audio" Command="{Binding DownloadCommand}" Width="140" Margin="8,0,0,0"/>
+        </StackPanel>
+      </StackPanel>
+
+      <!-- Soundboard controls -->
+      <DockPanel Grid.Row="1">
       <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,8">
         <Button Content="Add Sound…" Command="{Binding AddSoundCommand}" Padding="12,4"/>
         <Button Content="Save Layout" Command="{Binding SaveLayoutCommand}" Margin="8,0,0,0" Padding="12,4"/>
@@ -74,6 +80,7 @@
           </ItemsControl.ItemTemplate>
         </ItemsControl>
       </ScrollViewer>
-    </DockPanel>
-  </Grid>
+      </DockPanel>
+    </Grid>
+  </DockPanel>
 </Window>
