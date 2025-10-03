@@ -149,20 +149,22 @@
     <Style x:Key="ModernMenu" TargetType="Menu">
       <Setter Property="Background" Value="{StaticResource BackgroundMedium}"/>
       <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
-      <Setter Property="FontSize" Value="14"/>
+      <Setter Property="FontSize" Value="13"/>
     </Style>
 
     <Style x:Key="ModernMenuItem" TargetType="MenuItem">
       <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
       <Setter Property="Background" Value="Transparent"/>
-      <Setter Property="Padding" Value="12,8"/>
+      <Setter Property="Padding" Value="10,6"/>
+      <Setter Property="Cursor" Value="Hand"/>
       <Setter Property="Template">
         <Setter.Value>
           <ControlTemplate TargetType="MenuItem">
-            <Border Background="{TemplateBinding Background}"
+            <Border x:Name="border"
+                    Background="{TemplateBinding Background}"
                     BorderThickness="0"
-                    CornerRadius="4"
-                    Margin="2">
+                    CornerRadius="6"
+                    Margin="1">
               <Grid>
                 <Grid.ColumnDefinitions>
                   <ColumnDefinition Width="*"/>
@@ -170,28 +172,31 @@
                 </Grid.ColumnDefinitions>
                 <ContentPresenter ContentSource="Header"
                                   Margin="{TemplateBinding Padding}"
-                                  VerticalAlignment="Center"/>
+                                  VerticalAlignment="Center"
+                                  HorizontalAlignment="Left"/>
                 <Path Grid.Column="1"
                       x:Name="Arrow"
                       Data="M0,0 L4,4 L0,8"
                       Stroke="{TemplateBinding Foreground}"
-                      StrokeThickness="1"
-                      Margin="8,0,4,0"
+                      StrokeThickness="1.5"
+                      Margin="8,0,6,0"
                       VerticalAlignment="Center"
                       Visibility="Collapsed"/>
                 <Popup x:Name="PART_Popup"
                        IsOpen="{TemplateBinding IsSubmenuOpen}"
                        Placement="Bottom"
                        AllowsTransparency="True"
-                       Focusable="False">
-                  <Border Background="{StaticResource BackgroundLight}"
-                          BorderBrush="{StaticResource BorderColor}"
+                       Focusable="False"
+                       PopupAnimation="Fade">
+                  <Border Background="{StaticResource BackgroundMedium}"
+                          BorderBrush="{StaticResource AccentPrimary}"
                           BorderThickness="1"
                           CornerRadius="8"
-                          Padding="4"
-                          Margin="0,4,0,0">
+                          Padding="6"
+                          Margin="0,2,0,0"
+                          MinWidth="180">
                     <Border.Effect>
-                      <DropShadowEffect Color="Black" Opacity="0.5" BlurRadius="10" ShadowDepth="2"/>
+                      <DropShadowEffect Color="#8B5CF6" Opacity="0.6" BlurRadius="16" ShadowDepth="0"/>
                     </Border.Effect>
                     <ItemsPresenter/>
                   </Border>
@@ -207,10 +212,13 @@
                 <Setter TargetName="PART_Popup" Property="Placement" Value="Right"/>
               </Trigger>
               <Trigger Property="IsHighlighted" Value="True">
-                <Setter Property="Background" Value="{StaticResource BackgroundLight}"/>
+                <Setter TargetName="border" Property="Background" Value="{StaticResource AccentPrimary}"/>
+              </Trigger>
+              <Trigger Property="IsMouseOver" Value="True">
+                <Setter TargetName="border" Property="Background" Value="{StaticResource AccentPrimary}"/>
               </Trigger>
               <Trigger Property="IsPressed" Value="True">
-                <Setter Property="Background" Value="{StaticResource AccentPrimary}"/>
+                <Setter TargetName="border" Property="Background" Value="{StaticResource AccentPrimaryHover}"/>
               </Trigger>
             </ControlTemplate.Triggers>
           </ControlTemplate>

@@ -21,4 +21,8 @@
     <EnableDefaultApplicationDefinition>false</EnableDefaultApplicationDefinition>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Resource Include="Assets\logo-white.png" />
+  </ItemGroup>
+
 </Project>
