@@ -73,4 +73,9 @@ public partial class MainWindow : Window
     {
         WindowState = WindowState.Minimized;
     }
+
+    private void Maximize_Click(object sender, RoutedEventArgs e)
+    {
+        WindowState = WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;
+    }
 }

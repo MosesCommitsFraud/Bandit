@@ -48,15 +48,39 @@
                     FontSize="16"
                     VerticalContentAlignment="Center"
                     Padding="0,-8,0,0"
+                    Cursor="Hand"
                     Style="{x:Null}">
               <Button.Template>
                 <ControlTemplate TargetType="Button">
-                  <Border Background="{TemplateBinding Background}">
+                  <Border x:Name="border" Background="{TemplateBinding Background}">
                     <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                   </Border>
                   <ControlTemplate.Triggers>
                     <Trigger Property="IsMouseOver" Value="True">
-                      <Setter Property="Background" Value="{StaticResource BackgroundLight}"/>
+                      <Setter TargetName="border" Property="Background" Value="{StaticResource BackgroundLight}"/>
+                    </Trigger>
+                  </ControlTemplate.Triggers>
+                </ControlTemplate>
+              </Button.Template>
+            </Button>
+            <Button Content="□" 
+                    Width="40" 
+                    Height="40"
+                    Click="Maximize_Click"
+                    Background="Transparent"
+                    BorderThickness="0"
+                    Foreground="{StaticResource TextSecondary}"
+                    FontSize="16"
+                    Cursor="Hand"
+                    Style="{x:Null}">
+              <Button.Template>
+                <ControlTemplate TargetType="Button">
+                  <Border x:Name="border" Background="{TemplateBinding Background}">
+                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                  </Border>
+                  <ControlTemplate.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                      <Setter TargetName="border" Property="Background" Value="{StaticResource BackgroundLight}"/>
                     </Trigger>
                   </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -92,55 +116,19 @@
 
       <!-- Menu Bar -->
       <Menu DockPanel.Dock="Top" Padding="8,4">
-        <MenuItem Header="File">
-          <MenuItem.Style>
-            <Style TargetType="MenuItem" BasedOn="{StaticResource ModernMenuItem}">
-              <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                  <Setter Property="IsSubmenuOpen" Value="True"/>
-                </Trigger>
-              </Style.Triggers>
-            </Style>
-          </MenuItem.Style>
+        <MenuItem Header="File" StaysOpenOnClick="True">
           <MenuItem Header="Open Downloads Folder" Command="{Binding OpenFolderCommand}"/>
           <Separator/>
           <MenuItem Header="Exit" Click="Exit_Click"/>
         </MenuItem>
-        <MenuItem Header="Edit">
-          <MenuItem.Style>
-            <Style TargetType="MenuItem" BasedOn="{StaticResource ModernMenuItem}">
-              <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                  <Setter Property="IsSubmenuOpen" Value="True"/>
-                </Trigger>
-              </Style.Triggers>
-            </Style>
-          </MenuItem.Style>
+        <MenuItem Header="Edit" StaysOpenOnClick="True">
           <MenuItem Header="Add Sound..." Command="{Binding AddSoundCommand}"/>
           <MenuItem Header="Clear All Sounds" Command="{Binding ClearAllCommand}"/>
         </MenuItem>
-        <MenuItem Header="View">
-          <MenuItem.Style>
-            <Style TargetType="MenuItem" BasedOn="{StaticResource ModernMenuItem}">
-              <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                  <Setter Property="IsSubmenuOpen" Value="True"/>
-                </Trigger>
-              </Style.Triggers>
-            </Style>
-          </MenuItem.Style>
+        <MenuItem Header="View" StaysOpenOnClick="True">
           <MenuItem Header="Refresh Sounds" Command="{Binding RefreshCommand}" ToolTip="Reload all sounds from folder"/>
         </MenuItem>
-        <MenuItem Header="Help">
-          <MenuItem.Style>
-            <Style TargetType="MenuItem" BasedOn="{StaticResource ModernMenuItem}">
-              <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                  <Setter Property="IsSubmenuOpen" Value="True"/>
-                </Trigger>
-              </Style.Triggers>
-            </Style>
-          </MenuItem.Style>
+        <MenuItem Header="Help" StaysOpenOnClick="True">
           <MenuItem Header="About" Click="About_Click"/>
         </MenuItem>
       </Menu>
