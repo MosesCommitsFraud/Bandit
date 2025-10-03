@@ -13,6 +13,7 @@ namespace Bandit.App.Services;
 public class YouTubeDownloadService : IDownloadService
 {
     private readonly string _ytDlpPath;
+    private readonly string? _ffmpegPath;
 
     public YouTubeDownloadService()
     {
@@ -20,6 +21,13 @@ public class YouTubeDownloadService : IDownloadService
         var appDir = AppDomain.CurrentDomain.BaseDirectory;
         var localPath = Path.Combine(appDir, "yt-dlp.exe");
         _ytDlpPath = File.Exists(localPath) ? localPath : "yt-dlp";
+        
+        // Check if ffmpeg is in the app directory
+        var ffmpegLocal = Path.Combine(appDir, "ffmpeg.exe");
+        if (File.Exists(ffmpegLocal))
+        {
+            _ffmpegPath = Path.GetDirectoryName(ffmpegLocal);
+        }
     }
 
     public async Task<DownloadResult> DownloadAsync(
@@ -121,11 +129,28 @@ public class YouTubeDownloadService : IDownloadService
     {
         var args = new List<string>();
 
+        // Add ffmpeg location if we have it
+        if (!string.IsNullOrEmpty(_ffmpegPath))
+        {
+            args.Add($"--ffmpeg-location \"{_ffmpegPath}\"");
+        }
+
         if (request.Kind == DownloadKind.Audio)
         {
-            // Audio download - extract audio and convert to mp3
+            // Audio download - extract audio
             args.Add("-x"); // Extract audio
-            args.Add("--audio-format mp3");
+            
+            // Try to convert to mp3 if ffmpeg is available, otherwise use best available format
+            if (!string.IsNullOrEmpty(_ffmpegPath))
+            {
+                args.Add("--audio-format mp3");
+            }
+            else
+            {
+                // No ffmpeg - accept any format that yt-dlp can extract
+                args.Add("--audio-format best");
+            }
+            
             args.Add("--audio-quality 0"); // Best quality
             args.Add("-o \"%(title)s.%(ext)s\""); // Output template
         }
@@ -160,7 +185,7 @@ public class YouTubeDownloadService : IDownloadService
     private string? FindNewestFile(string directory, DownloadKind kind)
     {
         var extensions = kind == DownloadKind.Audio 
-            ? new[] { "*.mp3", "*.m4a", "*.opus", "*.wav" }
+            ? new[] { "*.mp3", "*.m4a", "*.opus", "*.wav", "*.webm", "*.ogg", "*.aac" }
             : new[] { "*.mp4", "*.webm", "*.mkv" };
 
         var files = extensions

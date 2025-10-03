@@ -10,7 +10,7 @@ public class AudioService : IDisposable
     private IWavePlayer? _output;
     private AudioFileReader? _reader;
 
-    private static readonly string[] SupportedExtensions = { ".mp3", ".wav", ".ogg", ".flac", ".m4a", ".aac", ".wma" };
+    private static readonly string[] SupportedExtensions = { ".mp3", ".wav", ".ogg", ".flac", ".m4a", ".aac", ".wma", ".opus", ".webm" };
 
     public bool IsAudioFile(string path)
     {

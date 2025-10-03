@@ -1,8 +1,14 @@
 <Application x:Class="Bandit.App.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:Bandit.App">
+             xmlns:local="clr-namespace:Bandit.App"
+             xmlns:converters="clr-namespace:Bandit.App.Converters">
   <Application.Resources>
+    <!-- Converters -->
+    <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+    <converters:InverseBooleanConverter x:Key="InverseBoolConverter"/>
+    <converters:InverseBooleanToVisibilityConverter x:Key="InverseBoolToVisibilityConverter"/>
+    
     <!-- Dark Grey + Purple Color Palette -->
     <SolidColorBrush x:Key="BackgroundDark" Color="#1A1A1A"/>
     <SolidColorBrush x:Key="BackgroundMedium" Color="#2A2A2A"/>

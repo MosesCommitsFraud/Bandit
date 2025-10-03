@@ -29,6 +29,12 @@ public class MainViewModel : INotifyPropertyChanged
     private string _logText = "";
     public string LogText { get => _logText; set { _logText = value; OnPropertyChanged(); } }
 
+    private bool _isDownloading = false;
+    public bool IsDownloading { get => _isDownloading; set { _isDownloading = value; OnPropertyChanged(); } }
+
+    private string _downloadProgress = "";
+    public string DownloadProgress { get => _downloadProgress; set { _downloadProgress = value; OnPropertyChanged(); } }
+
     public ICommand DownloadCommand { get; }
     public ICommand AddSoundCommand { get; }
     public ICommand SaveLayoutCommand { get; }
@@ -46,20 +52,60 @@ public class MainViewModel : INotifyPropertyChanged
         DownloadCommand = new RelayCommand(async () =>
         {
             if (string.IsNullOrWhiteSpace(Url)) { return; }
+            if (IsDownloading) { return; } // Prevent multiple simultaneous downloads
 
-            var outDir = _settings.DefaultDownloadDirectory;
-            Directory.CreateDirectory(outDir);
-
-            // Always extract audio from videos
-            var kind = DownloadKind.Audio;
-            
-            var progress = new Progress<string>(Append);
-            var res = await _downloader.DownloadAsync(new DownloadRequest(Url, outDir, kind), progress);
-
-            if (res.Success && !string.IsNullOrEmpty(res.OutputPath))
+            try
             {
-                // Always auto-add audio files to soundboard
-                AddSoundToBoard(res.OutputPath);
+                IsDownloading = true;
+                DownloadProgress = "Starting download...";
+
+                var outDir = _settings.DefaultDownloadDirectory;
+                Directory.CreateDirectory(outDir);
+
+                // Always extract audio from videos
+                var kind = DownloadKind.Audio;
+                
+                var progress = new Progress<string>(msg =>
+                {
+                    DownloadProgress = msg;
+                    Append(msg);
+                });
+                
+                var res = await _downloader.DownloadAsync(new DownloadRequest(Url, outDir, kind), progress);
+
+                if (res.Success && !string.IsNullOrEmpty(res.OutputPath))
+                {
+                    DownloadProgress = "Download complete! Adding to soundboard...";
+                    
+                    // Check if already exists before adding
+                    if (!Sounds.Any(s => s.Model.Path.Equals(res.OutputPath, StringComparison.OrdinalIgnoreCase)))
+                    {
+                        AddSoundToBoard(res.OutputPath);
+                    }
+                    
+                    // Clear URL after successful download
+                    Url = "";
+                    DownloadProgress = "Ready!";
+                    
+                    // Clear progress message after 2 seconds
+                    await System.Threading.Tasks.Task.Delay(2000);
+                    if (DownloadProgress == "Ready!")
+                    {
+                        DownloadProgress = "";
+                    }
+                }
+                else
+                {
+                    DownloadProgress = "Download failed. Please try again.";
+                }
+            }
+            catch (Exception ex)
+            {
+                DownloadProgress = $"Error: {ex.Message}";
+            }
+            finally
+            {
+                IsDownloading = false;
             }
         });
 
