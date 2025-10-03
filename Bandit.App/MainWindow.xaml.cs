@@ -44,16 +44,33 @@ public partial class MainWindow : Window
     private void About_Click(object sender, RoutedEventArgs e)
     {
         MessageBox.Show(
-            "GnR - Grab and Run Soundboard\n\n" +
+            "Bandit Soundboard\n\n" +
             "A YouTube downloader with hotkey-enabled soundboard.\n\n" +
             "Features:\n" +
-            "• Download audio from YouTube\n" +
-            "• Drag & drop audio files\n" +
-            "• Global hotkey support\n" +
-            "• Auto-loads sounds from Music\\GnR folder\n\n" +
+            "ï¿½ Download audio from YouTube\n" +
+            "ï¿½ Drag & drop audio files\n" +
+            "ï¿½ Global hotkey support\n" +
+            "ï¿½ Auto-loads sounds from Music folder\n\n" +
             "Version 1.0",
-            "About GnR",
+            "About Bandit",
             MessageBoxButton.OK,
             MessageBoxImage.Information);
+    }
+
+    private void TitleBar_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+    {
+        if (e.ClickCount == 2)
+        {
+            WindowState = WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;
+        }
+        else
+        {
+            DragMove();
+        }
+    }
+
+    private void Minimize_Click(object sender, RoutedEventArgs e)
+    {
+        WindowState = WindowState.Minimized;
     }
 }
