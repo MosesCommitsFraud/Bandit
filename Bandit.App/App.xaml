@@ -157,6 +157,8 @@
       <Setter Property="Background" Value="Transparent"/>
       <Setter Property="Padding" Value="10,6"/>
       <Setter Property="Cursor" Value="Hand"/>
+      <Setter Property="UseLayoutRounding" Value="True"/>
+      <Setter Property="SnapsToDevicePixels" Value="True"/>
       <Setter Property="Template">
         <Setter.Value>
           <ControlTemplate TargetType="MenuItem">
@@ -194,11 +196,15 @@
                           CornerRadius="8"
                           Padding="6"
                           Margin="0,2,0,0"
-                          MinWidth="180">
+                          MinWidth="180"
+                          UseLayoutRounding="True"
+                          SnapsToDevicePixels="True"
+                          TextOptions.TextFormattingMode="Display"
+                          TextOptions.TextRenderingMode="ClearType">
                     <Border.Effect>
-                      <DropShadowEffect Color="#8B5CF6" Opacity="0.6" BlurRadius="16" ShadowDepth="0"/>
+                      <DropShadowEffect Color="#8B5CF6" Opacity="0.6" BlurRadius="16" ShadowDepth="0" RenderingBias="Performance"/>
                     </Border.Effect>
-                    <ItemsPresenter/>
+                    <ItemsPresenter SnapsToDevicePixels="True"/>
                   </Border>
                 </Popup>
               </Grid>

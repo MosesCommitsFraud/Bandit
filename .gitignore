@@ -6,7 +6,6 @@ obj/
 *.userprefs
 *.cache
 *.dll
-*.exe
 *.pdb
 *.dylib
 

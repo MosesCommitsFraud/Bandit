@@ -37,79 +37,96 @@
                        FontWeight="SemiBold"
                        Foreground="{StaticResource TextPrimary}"/>
           </StackPanel>
-          <StackPanel Grid.Column="1" Orientation="Horizontal">
-            <Button Content="─" 
-                    Width="40" 
-                    Height="40"
-                    Click="Minimize_Click"
+          <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="0,0,8,0">
+            <!-- Minimize Button -->
+            <Border Width="32" 
+                    Height="32"
+                    Margin="4"
+                    CornerRadius="6"
                     Background="Transparent"
-                    BorderThickness="0"
-                    Foreground="{StaticResource TextSecondary}"
-                    FontSize="16"
-                    VerticalContentAlignment="Center"
-                    Padding="0,-8,0,0"
                     Cursor="Hand"
-                    Style="{x:Null}">
-              <Button.Template>
-                <ControlTemplate TargetType="Button">
-                  <Border x:Name="border" Background="{TemplateBinding Background}">
-                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                  </Border>
-                  <ControlTemplate.Triggers>
+                    MouseLeftButtonDown="Minimize_Click">
+              <Border.Style>
+                <Style TargetType="Border">
+                  <Setter Property="Background" Value="Transparent"/>
+                  <Style.Triggers>
                     <Trigger Property="IsMouseOver" Value="True">
-                      <Setter TargetName="border" Property="Background" Value="{StaticResource BackgroundLight}"/>
+                      <Setter Property="Background" Value="{StaticResource BackgroundLight}"/>
                     </Trigger>
-                  </ControlTemplate.Triggers>
-                </ControlTemplate>
-              </Button.Template>
-            </Button>
-            <Button Content="□" 
-                    Width="40" 
-                    Height="40"
-                    Click="Maximize_Click"
+                  </Style.Triggers>
+                </Style>
+              </Border.Style>
+              <Path Data="M 8,16 L 24,16" 
+                    Stroke="{StaticResource TextSecondary}" 
+                    StrokeThickness="2"
+                    Stretch="Uniform"
+                    Width="16"
+                    Height="16"/>
+            </Border>
+            
+            <!-- Maximize Button -->
+            <Border Width="32" 
+                    Height="32"
+                    Margin="4"
+                    CornerRadius="6"
                     Background="Transparent"
-                    BorderThickness="0"
-                    Foreground="{StaticResource TextSecondary}"
-                    FontSize="16"
                     Cursor="Hand"
-                    Style="{x:Null}">
-              <Button.Template>
-                <ControlTemplate TargetType="Button">
-                  <Border x:Name="border" Background="{TemplateBinding Background}">
-                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                  </Border>
-                  <ControlTemplate.Triggers>
+                    MouseLeftButtonDown="Maximize_Click">
+              <Border.Style>
+                <Style TargetType="Border">
+                  <Setter Property="Background" Value="Transparent"/>
+                  <Style.Triggers>
                     <Trigger Property="IsMouseOver" Value="True">
-                      <Setter TargetName="border" Property="Background" Value="{StaticResource BackgroundLight}"/>
+                      <Setter Property="Background" Value="{StaticResource BackgroundLight}"/>
                     </Trigger>
-                  </ControlTemplate.Triggers>
-                </ControlTemplate>
-              </Button.Template>
-            </Button>
-            <Button Content="✕" 
-                    Width="40" 
-                    Height="40"
-                    Click="Exit_Click"
+                  </Style.Triggers>
+                </Style>
+              </Border.Style>
+              <Path Data="M 8,8 L 24,8 L 24,24 L 8,24 Z" 
+                    Stroke="{StaticResource TextSecondary}" 
+                    StrokeThickness="2"
+                    Fill="Transparent"
+                    Stretch="Uniform"
+                    Width="14"
+                    Height="14"/>
+            </Border>
+            
+            <!-- Close Button -->
+            <Border Width="32" 
+                    Height="32"
+                    Margin="4"
+                    CornerRadius="6"
                     Background="Transparent"
-                    BorderThickness="0"
-                    Foreground="{StaticResource TextSecondary}"
-                    FontSize="16"
                     Cursor="Hand"
-                    Style="{x:Null}">
-              <Button.Template>
-                <ControlTemplate TargetType="Button">
-                  <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="0,12,0,0">
-                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                  </Border>
-                  <ControlTemplate.Triggers>
+                    MouseLeftButtonDown="Exit_Click">
+              <Border.Style>
+                <Style TargetType="Border">
+                  <Setter Property="Background" Value="Transparent"/>
+                  <Style.Triggers>
                     <Trigger Property="IsMouseOver" Value="True">
-                      <Setter TargetName="border" Property="Background" Value="{StaticResource AccentDanger}"/>
-                      <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
+                      <Setter Property="Background" Value="{StaticResource AccentDanger}"/>
                     </Trigger>
-                  </ControlTemplate.Triggers>
-                </ControlTemplate>
-              </Button.Template>
-            </Button>
+                  </Style.Triggers>
+                </Style>
+              </Border.Style>
+              <Path x:Name="closePath"
+                    Data="M 10,10 L 22,22 M 22,10 L 10,22" 
+                    Stroke="{StaticResource TextSecondary}" 
+                    StrokeThickness="2"
+                    Stretch="Uniform"
+                    Width="14"
+                    Height="14">
+                <Path.Style>
+                  <Style TargetType="Path">
+                    <Style.Triggers>
+                      <DataTrigger Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType=Border}}" Value="True">
+                        <Setter Property="Stroke" Value="{StaticResource TextPrimary}"/>
+                      </DataTrigger>
+                    </Style.Triggers>
+                  </Style>
+                </Path.Style>
+              </Path>
+            </Border>
           </StackPanel>
         </Grid>
       </Border>
