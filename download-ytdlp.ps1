@@ -1,7 +1,7 @@
 # PowerShell script to download yt-dlp.exe
 
 $ytDlpUrl = "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp.exe"
-$outputDir = Join-Path $PSScriptRoot "GnR.App\bin\Debug\net9.0-windows"
+$outputDir = Join-Path $PSScriptRoot "Bandit.App\bin\Debug\net9.0-windows"
 $outputPath = Join-Path $outputDir "yt-dlp.exe"
 
 Write-Host "Downloading yt-dlp.exe..." -ForegroundColor Cyan

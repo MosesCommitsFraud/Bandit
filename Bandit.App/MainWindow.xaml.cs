@@ -1,4 +1,4 @@
-ï»¿using System.Windows;
+using System.Windows;
 using Bandit.App.ViewModels;
 
 namespace Bandit.App;
@@ -44,15 +44,15 @@ public partial class MainWindow : Window
     private void About_Click(object sender, RoutedEventArgs e)
     {
         MessageBox.Show(
-            "Bandit Soundboard\n\n" +
+            "GnR - Grab and Run Soundboard\n\n" +
             "A YouTube downloader with hotkey-enabled soundboard.\n\n" +
             "Features:\n" +
-            "â€¢ Download audio from YouTube\n" +
-            "â€¢ Drag & drop audio files\n" +
-            "â€¢ Global hotkey support\n" +
-            "â€¢ Auto-loads sounds from Music\\Bandit folder\n\n" +
+            "• Download audio from YouTube\n" +
+            "• Drag & drop audio files\n" +
+            "• Global hotkey support\n" +
+            "• Auto-loads sounds from Music\\GnR folder\n\n" +
             "Version 1.0",
-            "About Bandit",
+            "About GnR",
             MessageBoxButton.OK,
             MessageBoxImage.Information);
     }

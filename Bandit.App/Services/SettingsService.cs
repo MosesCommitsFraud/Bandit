@@ -14,10 +14,10 @@ public class SettingsService
 
     public SettingsService()
     {
-        _dir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Bandit");
+        _dir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "GnR");
         Directory.CreateDirectory(_dir);
         _file = Path.Combine(_dir, "settings.json");
-        DefaultDownloadDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyMusic), "Bandit");
+        DefaultDownloadDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyMusic), "GnR");
     }
 
     public void Save(IEnumerable<SoundItemViewModel> vms)
