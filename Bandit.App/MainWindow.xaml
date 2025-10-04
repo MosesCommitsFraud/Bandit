@@ -150,6 +150,118 @@
         </MenuItem>
       </Menu>
 
+      <!-- Setup Mode Selector -->
+      <Border DockPanel.Dock="Bottom"
+              Background="#1E1E3F"
+              BorderBrush="{StaticResource AccentPrimary}"
+              BorderThickness="0,2,0,0"
+              Padding="16,12">
+        <StackPanel>
+          <TextBlock Text="🔧 CHOOSE YOUR SETUP MODE" 
+                     FontWeight="Bold"
+                     FontSize="14"
+                     Foreground="{StaticResource AccentSecondary}"
+                     Margin="0,0,0,12"/>
+          
+          <!-- Option 1: Stereo Mix (Windows Built-in) -->
+          <Border Background="{StaticResource BackgroundMedium}"
+                  BorderBrush="{StaticResource BorderColor}"
+                  BorderThickness="1"
+                  CornerRadius="8"
+                  Padding="12"
+                  Margin="0,0,0,8">
+            <StackPanel>
+              <TextBlock FontWeight="SemiBold" FontSize="13" Margin="0,0,0,4">
+                <Run Text="🔊 OPTION 1: STEREO MIX" Foreground="#00FF00"/>
+                <Run Text="(Windows Built-in - NO extra software!)" Foreground="{StaticResource TextSecondary}"/>
+              </TextBlock>
+              <TextBlock Foreground="{StaticResource TextSecondary}" FontSize="11" TextWrapping="Wrap" Margin="0,0,0,8">
+                ⚠️ Limitation: Only captures soundboard, NOT your voice. You must enable BOTH your mic AND Stereo Mix in Discord.
+              </TextBlock>
+              <Grid>
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="Auto"/>
+                  <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="1. Soundboard plays to:" 
+                           VerticalAlignment="Center"
+                           Margin="0,0,8,0"
+                           FontSize="11"/>
+                <ComboBox Grid.Column="1"
+                          ItemsSource="{Binding AudioService.OutputDevices}"
+                          SelectedIndex="{Binding AudioService.OutputDeviceIndex}"
+                          Height="28"
+                          ToolTip="Your speakers/headphones (Stereo Mix will capture this)"/>
+              </Grid>
+              <TextBlock Foreground="#FFA500" FontSize="11" Margin="0,8,0,0" TextWrapping="Wrap">
+                <Run Text="2. Enable 'Stereo Mix' in Windows:" FontWeight="SemiBold"/>
+                <Run Text="Right-click speaker icon → Sounds → Recording tab → Enable Stereo Mix"/>
+              </TextBlock>
+              <TextBlock Foreground="#FFA500" FontSize="11" Margin="0,4,0,0" TextWrapping="Wrap">
+                <Run Text="3. In Discord:" FontWeight="SemiBold"/>
+                <Run Text="Input Device → Set to 'Stereo Mix' (captures sounds only, your mic won't work!)"/>
+              </TextBlock>
+            </StackPanel>
+          </Border>
+
+          <!-- Option 2: Mic Mixing (Requires VB-Cable) -->
+          <Border Background="{StaticResource BackgroundMedium}"
+                  BorderBrush="{StaticResource BorderColor}"
+                  BorderThickness="1"
+                  CornerRadius="8"
+                  Padding="12">
+            <StackPanel>
+              <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                <CheckBox IsChecked="{Binding AudioService.MicrophonePassthroughEnabled}"
+                          VerticalAlignment="Center"
+                          Margin="0,0,8,0"/>
+                <TextBlock FontWeight="SemiBold" FontSize="13">
+                  <Run Text="🎙️ OPTION 2: MIC + SOUNDBOARD MIXING" Foreground="#00FF00"/>
+                  <Run Text="(Requires VB-Cable)" Foreground="#FF4444"/>
+                </TextBlock>
+              </StackPanel>
+              <TextBlock Foreground="{StaticResource TextSecondary}" FontSize="11" TextWrapping="Wrap" Margin="0,0,0,8">
+                ✅ Mixes your voice + sounds together. Requires VB-Audio Cable (free): vb-audio.com/Cable/
+              </TextBlock>
+              <Grid>
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="Auto"/>
+                  <ColumnDefinition Width="*"/>
+                  <ColumnDefinition Width="Auto"/>
+                  <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                
+                <TextBlock Text="1. Your Mic:" 
+                           VerticalAlignment="Center"
+                           Margin="0,0,8,0"
+                           FontSize="11"/>
+                <ComboBox Grid.Column="1"
+                          ItemsSource="{Binding AudioService.InputDevices}"
+                          SelectedIndex="{Binding AudioService.MicrophoneInputIndex}"
+                          Height="28"
+                          Margin="0,0,8,0"
+                          ToolTip="Your physical microphone"/>
+                
+                <TextBlock Grid.Column="2"
+                           Text="2. Output to:" 
+                           VerticalAlignment="Center"
+                           Margin="0,0,8,0"
+                           FontSize="11"/>
+                <ComboBox Grid.Column="3"
+                          ItemsSource="{Binding AudioService.OutputDevices}"
+                          SelectedIndex="{Binding AudioService.OutputDeviceIndex}"
+                          Height="28"
+                          ToolTip="CABLE Input (VB-Cable)"/>
+              </Grid>
+              <TextBlock Foreground="#FFA500" FontSize="11" Margin="0,8,0,0" TextWrapping="Wrap">
+                <Run Text="3. In Discord:" FontWeight="SemiBold"/>
+                <Run Text="Input Device → Set to 'CABLE Output'"/>
+              </TextBlock>
+            </StackPanel>
+          </Border>
+        </StackPanel>
+      </Border>
+
       <!-- Media Player Control Bar -->
       <Border DockPanel.Dock="Bottom"
               Background="{StaticResource BackgroundMedium}"
@@ -301,153 +413,65 @@
               </TextBlock>
             </StackPanel>
 
-            <!-- Volume and Device Selection -->
+            <!-- Volume Controls -->
             <StackPanel Grid.Column="2" Orientation="Horizontal">
-              <!-- Output Volume (Primary Output - for virtual mic/streaming) -->
-              <StackPanel Orientation="Horizontal" Margin="0,0,20,0">
-                <TextBlock Text="🎤"
-                           FontSize="16"
-                           FontFamily="Segoe UI Emoji, Segoe UI Symbol, Arial"
-                           VerticalAlignment="Center"
-                           Margin="0,0,8,0"
-                           ToolTip="Primary Output (use virtual cable for mic input in Discord/OBS)"/>
-                <ComboBox ItemsSource="{Binding AudioService.OutputDevices}"
-                          SelectedIndex="{Binding AudioService.OutputDeviceIndex}"
-                          Width="150"
-                          Height="32"
-                          Margin="0,0,8,0"
-                          VerticalContentAlignment="Center"
-                          ToolTip="Primary output device (e.g., virtual cable for streaming)"/>
-                <TextBlock Text="🔊"
-                           FontSize="14"
-                           FontFamily="Segoe UI Emoji, Segoe UI Symbol, Arial"
-                           VerticalAlignment="Center"
-                           Margin="0,0,4,0"/>
-                <Slider Minimum="0"
-                        Maximum="100"
-                        Value="{Binding AudioService.OutputVolume, Converter={StaticResource VolumeConverter}}"
-                        Width="80"
-                        Height="20"
-                        VerticalAlignment="Center"
-                        ToolTip="Output Volume">
-                  <Slider.Style>
-                    <Style TargetType="Slider">
-                      <Setter Property="Template">
-                        <Setter.Value>
-                          <ControlTemplate TargetType="Slider">
-                            <Grid>
-                              <Border Background="{StaticResource BackgroundLight}"
-                                      Height="4"
-                                      CornerRadius="2"
-                                      VerticalAlignment="Center"/>
-                              <Track x:Name="PART_Track">
-                                <Track.DecreaseRepeatButton>
-                                  <RepeatButton Command="Slider.DecreaseLarge" Opacity="0"/>
-                                </Track.DecreaseRepeatButton>
-                                <Track.IncreaseRepeatButton>
-                                  <RepeatButton Command="Slider.IncreaseLarge" Opacity="0"/>
-                                </Track.IncreaseRepeatButton>
-                                <Track.Thumb>
-                                  <Thumb>
-                                    <Thumb.Template>
-                                      <ControlTemplate TargetType="Thumb">
-                                        <Ellipse Width="12" Height="12"
-                                                 Fill="{StaticResource AccentPrimary}"
-                                                 Stroke="{StaticResource TextPrimary}"
-                                                 StrokeThickness="2"/>
-                                      </ControlTemplate>
-                                    </Thumb.Template>
-                                  </Thumb>
-                                </Track.Thumb>
-                              </Track>
-                            </Grid>
-                          </ControlTemplate>
-                        </Setter.Value>
-                      </Setter>
-                    </Style>
-                  </Slider.Style>
-                </Slider>
-                <TextBlock Text="{Binding AudioService.OutputVolume, StringFormat='{}{0:P0}'}"
-                           Foreground="{StaticResource TextSecondary}"
-                           FontSize="11"
-                           VerticalAlignment="Center"
-                           Width="35"
-                           TextAlignment="Right"
-                           Margin="4,0,0,0"/>
-              </StackPanel>
-
-              <!-- Monitor Volume (Secondary Output - for personal monitoring) -->
-              <StackPanel Orientation="Horizontal">
-                <TextBlock Text="🎧"
-                           FontSize="16"
-                           FontFamily="Segoe UI Emoji, Segoe UI Symbol, Arial"
-                           VerticalAlignment="Center"
-                           Margin="0,0,8,0"
-                           ToolTip="Monitor Output (hear the audio yourself)"/>
-                <ComboBox ItemsSource="{Binding AudioService.OutputDevices}"
-                          SelectedIndex="{Binding AudioService.MonitorDeviceIndex}"
-                          Width="150"
-                          Height="32"
-                          Margin="0,0,8,0"
-                          VerticalContentAlignment="Center"
-                          ToolTip="Monitor device (e.g., your headphones/speakers to hear playback)"/>
-                <TextBlock Text="🔊"
-                           FontSize="14"
-                           FontFamily="Segoe UI Emoji, Segoe UI Symbol, Arial"
-                           VerticalAlignment="Center"
-                           Margin="0,0,4,0"/>
-                <Slider Minimum="0"
-                        Maximum="100"
-                        Value="{Binding AudioService.MonitorVolume, Converter={StaticResource VolumeConverter}}"
-                        Width="80"
-                        Height="20"
-                        VerticalAlignment="Center"
-                        ToolTip="Monitor Volume">
-                  <Slider.Style>
-                    <Style TargetType="Slider">
-                      <Setter Property="Template">
-                        <Setter.Value>
-                          <ControlTemplate TargetType="Slider">
-                            <Grid>
-                              <Border Background="{StaticResource BackgroundLight}"
-                                      Height="4"
-                                      CornerRadius="2"
-                                      VerticalAlignment="Center"/>
-                              <Track x:Name="PART_Track">
-                                <Track.DecreaseRepeatButton>
-                                  <RepeatButton Command="Slider.DecreaseLarge" Opacity="0"/>
-                                </Track.DecreaseRepeatButton>
-                                <Track.IncreaseRepeatButton>
-                                  <RepeatButton Command="Slider.IncreaseLarge" Opacity="0"/>
-                                </Track.IncreaseRepeatButton>
-                                <Track.Thumb>
-                                  <Thumb>
-                                    <Thumb.Template>
-                                      <ControlTemplate TargetType="Thumb">
-                                        <Ellipse Width="12" Height="12"
-                                                 Fill="{StaticResource AccentPrimary}"
-                                                 Stroke="{StaticResource TextPrimary}"
-                                                 StrokeThickness="2"/>
-                                      </ControlTemplate>
-                                    </Thumb.Template>
-                                  </Thumb>
-                                </Track.Thumb>
-                              </Track>
-                            </Grid>
-                          </ControlTemplate>
-                        </Setter.Value>
-                      </Setter>
-                    </Style>
-                  </Slider.Style>
-                </Slider>
-                <TextBlock Text="{Binding AudioService.MonitorVolume, StringFormat='{}{0:P0}'}"
-                           Foreground="{StaticResource TextSecondary}"
-                           FontSize="11"
-                           VerticalAlignment="Center"
-                           Width="35"
-                           TextAlignment="Right"
-                           Margin="4,0,0,0"/>
-              </StackPanel>
+              <TextBlock Text="🔊 Soundboard Volume"
+                         Foreground="{StaticResource TextSecondary}"
+                         FontSize="12"
+                         VerticalAlignment="Center"
+                         Margin="0,0,8,0"/>
+              <Slider Minimum="0"
+                      Maximum="100"
+                      Value="{Binding AudioService.OutputVolume, Converter={StaticResource VolumeConverter}}"
+                      Width="120"
+                      Height="20"
+                      VerticalAlignment="Center"
+                      ToolTip="Adjust how loud sounds play">
+                <Slider.Style>
+                  <Style TargetType="Slider">
+                    <Setter Property="Template">
+                      <Setter.Value>
+                        <ControlTemplate TargetType="Slider">
+                          <Grid>
+                            <Border Background="{StaticResource BackgroundLight}"
+                                    Height="4"
+                                    CornerRadius="2"
+                                    VerticalAlignment="Center"/>
+                            <Track x:Name="PART_Track">
+                              <Track.DecreaseRepeatButton>
+                                <RepeatButton Command="Slider.DecreaseLarge" Opacity="0"/>
+                              </Track.DecreaseRepeatButton>
+                              <Track.IncreaseRepeatButton>
+                                <RepeatButton Command="Slider.IncreaseLarge" Opacity="0"/>
+                              </Track.IncreaseRepeatButton>
+                              <Track.Thumb>
+                                <Thumb>
+                                  <Thumb.Template>
+                                    <ControlTemplate TargetType="Thumb">
+                                      <Ellipse Width="12" Height="12"
+                                               Fill="{StaticResource AccentPrimary}"
+                                               Stroke="{StaticResource TextPrimary}"
+                                               StrokeThickness="2"/>
+                                    </ControlTemplate>
+                                  </Thumb.Template>
+                                </Thumb>
+                              </Track.Thumb>
+                            </Track>
+                          </Grid>
+                        </ControlTemplate>
+                      </Setter.Value>
+                    </Setter>
+                  </Style>
+                </Slider.Style>
+              </Slider>
+              <TextBlock Text="{Binding AudioService.OutputVolume, StringFormat='{}{0:P0}'}"
+                         Foreground="{StaticResource TextSecondary}"
+                         FontSize="12"
+                         FontWeight="SemiBold"
+                         VerticalAlignment="Center"
+                         Width="40"
+                         TextAlignment="Right"
+                         Margin="8,0,0,0"/>
             </StackPanel>
           </Grid>
         </Grid>

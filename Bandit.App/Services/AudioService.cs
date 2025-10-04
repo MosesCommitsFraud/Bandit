@@ -1,4 +1,5 @@
 using NAudio.Wave;
+using NAudio.Wave.SampleProviders;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -11,11 +12,17 @@ namespace Bandit.App.Services;
 
 public class AudioService : IDisposable, INotifyPropertyChanged
 {
-    private WaveOutEvent? _outputDevice;  // For mic output
-    private WaveOutEvent? _monitorDevice;  // For headphone monitoring
+    private WaveOutEvent? _outputDevice;  // For virtual mic output (to Discord/OBS)
+    private WaveOutEvent? _monitorDevice;  // For personal monitoring (your headphones/speakers)
     private AudioFileReader? _outputReader;
     private AudioFileReader? _monitorReader;
     private DispatcherTimer? _positionTimer;
+    
+    // Microphone passthrough
+    private WaveInEvent? _microphoneIn;
+    private BufferedWaveProvider? _microphoneBuffer;
+    private MixingSampleProvider? _mixer;
+    private bool _microphonePassthroughEnabled = false;
 
     private static readonly string[] SupportedExtensions = { ".mp3", ".wav", ".ogg", ".flac", ".m4a", ".aac", ".wma", ".opus", ".webm" };
 
@@ -85,7 +92,7 @@ public class AudioService : IDisposable, INotifyPropertyChanged
     }
 
     // Device selection
-    private int _outputDeviceIndex = 0;  // For mic output
+    private int _outputDeviceIndex = 0;  // Virtual mic output (for Discord/OBS)
     public int OutputDeviceIndex 
     { 
         get => _outputDeviceIndex; 
@@ -93,10 +100,11 @@ public class AudioService : IDisposable, INotifyPropertyChanged
         { 
             _outputDeviceIndex = value;
             OnPropertyChanged();
+            RestartMicrophonePassthrough();
         } 
     }
 
-    private int _monitorDeviceIndex = 0;  // For headphone monitoring
+    private int _monitorDeviceIndex = 0;  // Personal monitor (your headphones/speakers)
     public int MonitorDeviceIndex 
     { 
         get => _monitorDeviceIndex; 
@@ -107,7 +115,34 @@ public class AudioService : IDisposable, INotifyPropertyChanged
         } 
     }
 
+    private int _microphoneInputIndex = -1;  // Physical microphone input
+    public int MicrophoneInputIndex 
+    { 
+        get => _microphoneInputIndex; 
+        set 
+        { 
+            _microphoneInputIndex = value;
+            OnPropertyChanged();
+            RestartMicrophonePassthrough();
+        } 
+    }
+
+    public bool MicrophonePassthroughEnabled
+    {
+        get => _microphonePassthroughEnabled;
+        set
+        {
+            _microphonePassthroughEnabled = value;
+            OnPropertyChanged();
+            if (value)
+                StartMicrophonePassthrough();
+            else
+                StopMicrophonePassthrough();
+        }
+    }
+
     public List<string> OutputDevices { get; private set; } = new();
+    public List<string> InputDevices { get; private set; } = new();
 
     public AudioService()
     {
@@ -140,6 +175,97 @@ public class AudioService : IDisposable, INotifyPropertyChanged
             OutputDevices.Add(caps.ProductName);
         }
         OnPropertyChanged(nameof(OutputDevices));
+
+        InputDevices.Clear();
+        for (int i = 0; i < WaveIn.DeviceCount; i++)
+        {
+            var caps = WaveIn.GetCapabilities(i);
+            InputDevices.Add(caps.ProductName);
+        }
+        OnPropertyChanged(nameof(InputDevices));
+    }
+
+    private void StartMicrophonePassthrough()
+    {
+        if (_microphoneInputIndex < 0 || _microphoneInputIndex >= WaveIn.DeviceCount)
+            return;
+
+        try
+        {
+            StopMicrophonePassthrough();
+
+            // Create microphone input
+            _microphoneIn = new WaveInEvent
+            {
+                DeviceNumber = _microphoneInputIndex,
+                WaveFormat = new WaveFormat(44100, 1) // 44.1kHz, mono
+            };
+
+            // Create buffer for microphone audio
+            _microphoneBuffer = new BufferedWaveProvider(_microphoneIn.WaveFormat)
+            {
+                BufferDuration = TimeSpan.FromSeconds(5),
+                DiscardOnBufferOverflow = true
+            };
+
+            // Create mixer
+            _mixer = new MixingSampleProvider(WaveFormat.CreateIeeeFloatWaveFormat(44100, 2))
+            {
+                ReadFully = true
+            };
+
+            // Add microphone to mixer (convert mono to stereo)
+            var micSampleProvider = _microphoneBuffer.ToSampleProvider();
+            var micStereo = new MonoToStereoSampleProvider(micSampleProvider);
+            _mixer.AddMixerInput(micStereo);
+
+            // Microphone data available event
+            _microphoneIn.DataAvailable += (s, e) =>
+            {
+                _microphoneBuffer?.AddSamples(e.Buffer, 0, e.BytesRecorded);
+            };
+
+            // Setup output device for mixed audio
+            if (_outputDevice == null || _outputDevice.PlaybackState == PlaybackState.Stopped)
+            {
+                _outputDevice = new WaveOutEvent { DeviceNumber = _outputDeviceIndex };
+                _outputDevice.Init(_mixer);
+                _outputDevice.Play();
+            }
+
+            // Start recording from microphone
+            _microphoneIn.StartRecording();
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Failed to start microphone passthrough: {ex.Message}");
+            StopMicrophonePassthrough();
+        }
+    }
+
+    private void StopMicrophonePassthrough()
+    {
+        _microphoneIn?.StopRecording();
+        _microphoneIn?.Dispose();
+        _microphoneIn = null;
+
+        _microphoneBuffer?.ClearBuffer();
+        _microphoneBuffer = null;
+
+        if (_mixer != null)
+        {
+            _mixer.RemoveAllMixerInputs();
+            _mixer = null;
+        }
+    }
+
+    private void RestartMicrophonePassthrough()
+    {
+        if (_microphonePassthroughEnabled)
+        {
+            StopMicrophonePassthrough();
+            StartMicrophonePassthrough();
+        }
     }
 
     public bool IsAudioFile(string path)
@@ -175,7 +301,7 @@ public class AudioService : IDisposable, INotifyPropertyChanged
             _outputReader.Volume = _outputVolume;
             _monitorReader.Volume = _monitorVolume;
 
-            // Setup output device (for mic output)
+            // Setup virtual mic output device (for Discord/OBS)
             _outputDevice = new WaveOutEvent { DeviceNumber = _outputDeviceIndex };
             _outputDevice.Init(_outputReader);
             _outputDevice.PlaybackStopped += (_, __) => 
@@ -185,7 +311,7 @@ public class AudioService : IDisposable, INotifyPropertyChanged
                 OnPlaybackStopped?.Invoke(this, EventArgs.Empty);
             };
 
-            // Setup monitor device (for headphone monitoring) only if different from output
+            // Setup personal monitor device (your headphones) only if different from output
             if (_monitorDeviceIndex != _outputDeviceIndex)
             {
                 _monitorDevice = new WaveOutEvent { DeviceNumber = _monitorDeviceIndex };
@@ -199,7 +325,7 @@ public class AudioService : IDisposable, INotifyPropertyChanged
                 _monitorReader = null;
             }
 
-            // Start playback on output device
+            // Start playback on both devices
             _outputDevice.Play();
 
             CurrentFile = path;
@@ -287,6 +413,7 @@ public class AudioService : IDisposable, INotifyPropertyChanged
     public void Dispose()
     {
         _positionTimer?.Stop();
+        StopMicrophonePassthrough();
         Stop();
     }
 }
