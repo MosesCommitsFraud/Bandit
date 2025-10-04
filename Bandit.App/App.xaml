@@ -8,6 +8,9 @@
     <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
     <converters:InverseBooleanConverter x:Key="InverseBoolConverter"/>
     <converters:InverseBooleanToVisibilityConverter x:Key="InverseBoolToVisibilityConverter"/>
+    <converters:PlayPauseConverter x:Key="PlayPauseConverter"/>
+    <converters:FileNameConverter x:Key="FileNameConverter"/>
+    <converters:VolumeConverter x:Key="VolumeConverter"/>
     
     <!-- Dark Grey + Purple Color Palette -->
     <SolidColorBrush x:Key="BackgroundDark" Color="#1A1A1A"/>
@@ -151,6 +154,16 @@
       </Setter>
     </Style>
 
+    <!-- Modern ComboBox Style -->
+    <Style x:Key="ModernComboBox" TargetType="ComboBox">
+      <Setter Property="Background" Value="{StaticResource BackgroundMedium}"/>
+      <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
+      <Setter Property="BorderBrush" Value="{StaticResource BorderColor}"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="Padding" Value="10,6"/>
+      <Setter Property="FontSize" Value="12"/>
+    </Style>
+
     <!-- Modern Menu Style -->
     <Style x:Key="ModernMenu" TargetType="Menu">
       <Setter Property="Background" Value="{StaticResource BackgroundMedium}"/>
@@ -245,6 +258,13 @@
       <Setter Property="Margin" Value="8,4"/>
     </Style>
 
+    <!-- Modern Slider Style -->
+    <Style TargetType="Slider">
+      <Setter Property="Foreground" Value="{StaticResource AccentPrimary}"/>
+      <Setter Property="Background" Value="{StaticResource BackgroundLight}"/>
+      <Setter Property="Height" Value="20"/>
+    </Style>
+
     <!-- ScrollBar Styles -->
     <Style TargetType="ScrollBar">
       <Setter Property="Background" Value="Transparent"/>
@@ -281,6 +301,7 @@
     <!-- Default Styles -->
     <Style TargetType="Button" BasedOn="{StaticResource ModernButton}"/>
     <Style TargetType="TextBox" BasedOn="{StaticResource ModernTextBox}"/>
+    <Style TargetType="ComboBox" BasedOn="{StaticResource ModernComboBox}"/>
     <Style TargetType="Menu" BasedOn="{StaticResource ModernMenu}"/>
     <Style TargetType="MenuItem" BasedOn="{StaticResource ModernMenuItem}"/>
     <Style TargetType="Window">

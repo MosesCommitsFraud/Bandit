@@ -42,6 +42,13 @@ public class MainViewModel : INotifyPropertyChanged
     public ICommand ClearAllCommand { get; }
     public ICommand RefreshCommand { get; }
 
+    // Media player commands
+    public ICommand PlayPauseCommand { get; }
+    public ICommand StopCommand { get; }
+
+    // Expose AudioService properties
+    public AudioService AudioService => _audio;
+
     public MainViewModel(IDownloadService downloader, AudioService audio, HotkeyService hotkeys, SettingsService settings)
     {
         _downloader = downloader;
@@ -174,6 +181,16 @@ public class MainViewModel : INotifyPropertyChanged
 
             // Reload from folder
             LoadSoundsFromFolder();
+        });
+
+        PlayPauseCommand = new RelayCommand(() =>
+        {
+            _audio.TogglePlayPause();
+        });
+
+        StopCommand = new RelayCommand(() =>
+        {
+            _audio.Stop();
         });
 
         // Load all audio files from the downloads folder
